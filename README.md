@@ -7,8 +7,8 @@
 
 ## 触发方式
 * 点亮`Star`
-* 凌晨4点定时执行
-*  自定义：.github/workflows/work.yaml 编辑
+* 早晨7点定时执行
+* 自定义：.github/workflows/work.yaml 编辑
 
 ## 注意问题
 
@@ -21,7 +21,6 @@
 >  **问题二：京东Cookie的有效期**
 > 
 > >就我自己项目中的使用情况而言，一个月有效期。
-
 
 
 ## 使用用法
@@ -47,7 +46,6 @@
 * github 授权登录[Server酱](http://sc.ftqq.com/3.version)官网；
 * 菜单栏`微信推送`扫描绑定微信；
 * 菜单栏`发送消息`拷贝SCKEY；
-
 
 
 ## 效果截图
