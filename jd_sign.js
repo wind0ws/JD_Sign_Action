@@ -13,6 +13,8 @@ const cookie = process.env.JD_COOKIE
 const dual_cookie = process.env.JD_DUAL_COOKIE
 // Server酱SCKEY
 const push_key = process.env.PUSH_KEY
+// PushPlus Key
+const pushplus_key = process.env.PUSHPLUS_KEY
 
 // 京东脚本文件
 const js_url = 'https://raw.githubusercontent.com/NobyDa/Script/master/JD-DailyBonus/JD_DailyBonus.js'
@@ -61,14 +63,54 @@ function setupCookie() {
   fs.writeFileSync(js_path, js_content, 'utf8')
 }
 
-function sendNotificationIfNeed() {
+function sendNotificationByPushplus() {
+  if (!pushplus_key) {
+    console.log('没有pushplus_key, 放弃推送!'); return;
+  }
+  if (!fs.existsSync(result_path)) {
+    console.log('没有执行结果，放弃pushplus推送!'); return;
+  }
+  let text = "京东签到_" + dateFormat();
+  let desp = fs.readFileSync(result_path, "utf8")
 
+  // 去除末尾的换行
+  let PUSHPLUS_TOKEN = pushplus_key.replace(/[\r\n]/g,"")
+
+  const options ={
+    uri:  `http://www.pushplus.plus/send`,
+    body: {
+       token: `${PUSHPLUS_TOKEN}`,		
+	   title: `${text}`,
+       content: `${desp}`	   
+	},
+    json: true,
+    method: 'POST'
+  }
+
+  rp.post(options).then(res=>{
+    const code = res['code'];
+    if (code == 200) {
+      console.log("pushplus通知发送成功，任务结束！")
+    }
+    else {
+      console.log(res);
+      console.log("pushplus通知发送失败，任务中断！")
+      fs.writeFileSync(error_path, JSON.stringify(res), 'utf8')
+    }
+  }).catch((err)=>{
+    console.log("pushplus通知发送失败，任务中断！")
+    fs.writeFileSync(error_path, err, 'utf8')
+  })
+
+}
+
+function sendNotificationBySC() {
   if (!push_key) {
-    console.log('执行任务结束!'); return;
+    console.log('没有push_key, 放弃推送!'); return;
   }
 
   if (!fs.existsSync(result_path)) {
-    console.log('没有执行结果，任务中断!'); return;
+    console.log('没有执行结果，放弃SC推送!'); return;
   }
 
   let text = "京东签到_" + dateFormat();
@@ -87,17 +129,23 @@ function sendNotificationIfNeed() {
   rp.post(options).then(res=>{
     const code = res['errno'];
     if (code == 0) {
-      console.log("通知发送成功，任务结束！")
+      console.log("SC通知发送成功，任务结束！")
     }
     else {
       console.log(res);
-      console.log("通知发送失败，任务中断！")
+      console.log("SC通知发送失败，任务中断！")
       fs.writeFileSync(error_path, JSON.stringify(res), 'utf8')
     }
   }).catch((err)=>{
-    console.log("通知发送失败，任务中断！")
+    console.log("SC通知发送失败，任务中断！")
     fs.writeFileSync(error_path, err, 'utf8')
   })
+}
+
+
+function sendNotificationIfNeed() {
+	sendNotificationBySC();
+	sendNotificationByPushplus();
 }
 
 function main() {
